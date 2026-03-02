@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'jdk17'
-        maven 'maven3'
-    }
 
     parameters {
         string(name: 'SONAR_IP', defaultValue: '13.50.246.94', description: 'SonarQube Server IP')
@@ -26,7 +22,12 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh '''
+                    #Clean previous build
+                    make clean
+                    #Run build wrapper and compile project
+                    build-wrapper-linux-x86-64 --out-dir bw-output make
+                '''
             }
         }
 
@@ -35,6 +36,8 @@ pipeline {
                 sh """
                     mvn sonar:sonar \
                         -Dsonar.projectKey=demo-sonar \
+                        -Dsonar.sources=. \ 
+                        -Dsonar.cfamily.build-wrapper-output=bw-output \
                         -Dsonar.host.url=$SONARQUBE_URL \
                         -Dsonar.login=$SONARQUBE_TOKEN
                 """
