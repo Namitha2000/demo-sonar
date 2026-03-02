@@ -1,18 +1,22 @@
 pipeline {
     agent any
+
     tools {
-        // Java is only needed if SonarScanner requires it
         jdk 'jdk17'
-        git 'Default'
+        maven 'maven3'
     }
+
     parameters {
-        string(name: 'SONAR_URL', defaultValue: '13.50.246.94', description: 'SonarQube server IP')
+        string(name: 'SONAR_IP', defaultValue: '13.50.246.94', description: 'SonarQube Server IP')
     }
+
     environment {
-        SONARQUBE_URL = "http://${params.SONAR_URL}:9000"
-        SONARQUBE_TOKEN = credentials('sonar-token') // Use Jenkins credentials ID
+        SONARQUBE_URL = "http://${params.SONAR_IP}:9000"
+        SONARQUBE_TOKEN = 'squ_093817fe64b396b3ca8ad1642543582ec70b6b87' // Hardcoded token
     }
+
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'master',
@@ -22,23 +26,18 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'make clean'
-                sh 'build-wrapper-linux-x86-64 --out-dir bw-output make'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    sonar-scanner \
+                sh """
+                    mvn sonar:sonar \
                         -Dsonar.projectKey=demo-sonar \
-                        -Dsonar.sources=. \
-                        -Dsonar.cfamily.build-wrapper-output=bw-output \
                         -Dsonar.host.url=$SONARQUBE_URL \
                         -Dsonar.login=$SONARQUBE_TOKEN
-                    """
-                }
+                """
             }
         }
     }
