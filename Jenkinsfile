@@ -33,14 +33,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                sh """
-                    mvn sonar:sonar \
+                sh '''
+                    sonar-scanner \
                         -Dsonar.projectKey=demo-sonar \
                         -Dsonar.sources=. \ 
                         -Dsonar.cfamily.build-wrapper-output=bw-output \
                         -Dsonar.host.url=$SONARQUBE_URL \
                         -Dsonar.login=$SONARQUBE_TOKEN
-                """
+                '''
             }
         }
     }
