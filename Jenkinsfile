@@ -21,13 +21,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh '''
-                    # Clean previous build
-                    make clean
+                   sh 'make clean && make'
 
-                    # Run build wrapper and compile project
-                    build-wrapper-linux-x86-64 --out-dir bw-output make
-                '''
             }
         }
 
