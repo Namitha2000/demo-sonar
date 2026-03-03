@@ -5,11 +5,6 @@ pipeline {
         string(name: 'SONAR_IP', defaultValue: '13.50.246.94', description: 'SonarQube Server IP')
     }
 
-    environment {
-        SONARQUBE_URL = "http://${params.SONAR_IP}:9000"
-        SONARQUBE_TOKEN = 'squ_093817fe64b396b3ca8ad1642543582ec70b6b87'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -21,20 +16,16 @@ pipeline {
 
         stage('Build') {
             steps {
-                   sh 'make clean && make'
-
+                sh 'make clean && make'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=demo-sonar \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=$SONARQUBE_URL \
-                    -Dsonar.login=$SONARQUBE_TOKEN
-                '''
+                // This uses the SonarQube Scanner plugin
+                withSonarQubeEnv('SonarQube') {
+                    sh 'sonar-scanner -Dsonar.projectKey=demo-sonar -Dsonar.sources=.'
+                }
             }
         }
     }
