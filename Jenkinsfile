@@ -27,10 +27,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Make Jenkins-managed scanner available in PATH
-                tool name: 'SonarQubeScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-
-                // Inject SonarQube server environment (URL, token)
+                // Use Jenkins-managed SonarQube Scanner automatically
                 withSonarQubeEnv('SonarQube') {
                     sh """
                         sonar-scanner \
@@ -41,6 +38,12 @@ pipeline {
                     """
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished."
         }
     }
 }
