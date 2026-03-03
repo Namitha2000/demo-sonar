@@ -27,23 +27,17 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Use Jenkins-managed SonarQube Scanner automatically
+                // Use the Jenkins-installed SonarQube Scanner
+                tool name: 'SonarQubeScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                 withSonarQubeEnv('SonarQube') {
-                    sh """
-                        sonar-scanner \
-                            -Dsonar.projectKey=demo-sonar \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=$SONARQUBE_URL \
-                            -Dsonar.login=$SONARQUBE_TOKEN
+                    sh """${tool 'SonarQubeScanner'}/bin/sonar-scanner \
+                        -Dsonar.projectKey=demo-sonar \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONARQUBE_URL \
+                        -Dsonar.login=$SONARQUBE_TOKEN
                     """
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Pipeline finished."
         }
     }
 }
